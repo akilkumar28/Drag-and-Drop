@@ -11,20 +11,20 @@ import MobileCoreServices
 
 class ViewController: UIViewController,UITableViewDataSource,UITableViewDelegate,UITableViewDragDelegate,UITableViewDropDelegate {
     
-
+    
     let leftTableView = UITableView()
     let rightTableView = UITableView()
     
-    var leftArray  = [String](repeating: "left", count: 10)
-    var rightArray = [String](repeating: "right", count: 10)
-
+    var leftArray  = [String](repeating: "left", count: 5)
+    var rightArray = [String](repeating: "right", count: 5)
+    
     
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         intianSetup()
-    
+        
     }
     
     fileprivate func intianSetup() {
@@ -89,7 +89,34 @@ class ViewController: UIViewController,UITableViewDataSource,UITableViewDelegate
     }
     
     func tableView(_ tableView: UITableView, performDropWith coordinator: UITableViewDropCoordinator) {
-        print(222)
+        
+        let destinationIndexPath:IndexPath!
+        
+        if let indexPath = coordinator.destinationIndexPath {
+            destinationIndexPath = indexPath
+        } else {
+            let section = tableView.numberOfSections - 1
+            let row = tableView.numberOfRows(inSection: section)
+            destinationIndexPath = IndexPath(row: row, section: section)
+        }
+        
+        coordinator.session.loadObjects(ofClass: NSString.self) { (items) in
+            guard let strings = items as? [String] else {return}
+            var indexArray = [IndexPath]()
+            
+            for (index,string) in strings.enumerated() {
+                let index = IndexPath(row: destinationIndexPath.row + index, section: destinationIndexPath.section)
+                if tableView == self.leftTableView {
+                    self.leftArray.insert(string, at: index.row)
+                } else {
+                    self.rightArray.insert(string, at: index.row)
+                }
+                indexArray.append(index)
+            }
+            tableView.insertRows(at: indexArray, with: .automatic)
+            
+        }
+        
     }
 }
 
